@@ -56,6 +56,7 @@ public class PlayerController : MonoBehaviour
             GameManager.Instance.RevertAllToPreviousPositions();
             GameManager.Instance.CheckLava();
             RevertRewind();
+            checkSwitches();
         }
     }
 
@@ -87,20 +88,7 @@ public class PlayerController : MonoBehaviour
         UpdatePositionHistory();
 
         // Instead of checking switches here, let each SwitchController handle its own activation.
-        if (switches != null)
-        {
-            foreach (GameObject sw in switches)
-            {
-                if (sw != null)
-                {
-                    SwitchController switchController = sw.GetComponent<SwitchController>();
-                    if (switchController != null)
-                    {
-                        switchController.Active();
-                    }
-                }
-            }
-        }
+        checkSwitches();
 
         // Continue with other updates
         UpdateIndicator();
@@ -187,6 +175,24 @@ public class PlayerController : MonoBehaviour
                 Debug.Log(rewinded);
             }
             UpdateIndicator();
+        }
+    }
+
+    private void checkSwitches()
+    {
+        if (switches != null)
+        {
+            foreach (GameObject sw in switches)
+            {
+                if (sw != null)
+                {
+                    SwitchController switchController = sw.GetComponent<SwitchController>();
+                    if (switchController != null)
+                    {
+                        switchController.Active();
+                    }
+                }
+            }
         }
     }
 }
