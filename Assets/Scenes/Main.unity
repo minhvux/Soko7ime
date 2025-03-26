@@ -14199,11 +14199,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7521710766661704280, guid: 9623f09724015304db6e8453a29de450, type: 3}
       propertyPath: rewinded
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7521710766661704280, guid: 9623f09724015304db6e8453a29de450, type: 3}
+      propertyPath: rewindSteps
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7521710766661704280, guid: 9623f09724015304db6e8453a29de450, type: 3}
       propertyPath: turnOffRewind
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7521710766661704280, guid: 9623f09724015304db6e8453a29de450, type: 3}
       propertyPath: switches.Array.size

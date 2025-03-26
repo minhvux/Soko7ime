@@ -6,10 +6,11 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 1f;
     private Vector2 moveDirection;
 
-    public int rewindSteps = 5; // Number of steps to rewind
+    public int rewindSteps = 7; // Number of steps to rewind
     private int rewindIndex = 0;
     public bool rewinded = false;
     private int rewindedIndex = 0;
+    private int FutureTravelIndex = 0;
 
     public bool turnOffRewind = false;
 
@@ -26,6 +27,11 @@ public class PlayerController : MonoBehaviour
     // Each switch should have a SwitchController component.
     public GameObject[] switches;
 
+    // NEW: Ghost mode flag, ghostUsed flag, and Animator
+    private bool ghostMode = false;
+    public bool ghostUsed = false; // This ensures ghost mode can be used only once per level
+    public Animator animator; // Assign your Animator in the Inspector
+
     void Start()
     {
         // Create an indicator at the start (but disable it initially)
@@ -38,34 +44,53 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {   
-        // Handle player movement
+        // Toggle ghost mode with R
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            ToggleGhostMode();
+        }
+        
+        // Handle player movement with WASD
         if (Input.GetKeyDown(KeyCode.W)) Move(Vector2.up);
         if (Input.GetKeyDown(KeyCode.S)) Move(Vector2.down);
         if (Input.GetKeyDown(KeyCode.A)) Move(Vector2.left);
         if (Input.GetKeyDown(KeyCode.D)) Move(Vector2.right);
 
-        // Rewind functionality
-        if (Input.GetKeyDown(KeyCode.Q)) // Press 'Q' to rewind
+        if(!ghostMode)
         {
-            Rewind();
-        }      
+            // Rewind functionality
+            if (Input.GetKeyDown(KeyCode.Q)) // Press 'Q' to rewind
+            {
+                Rewind();
+            }      
 
-        // Revert functionality
-        if (Input.GetKeyDown(KeyCode.E)) // Press 'E' to revert everything
-        {   
-            GameManager.Instance.RevertAllToPreviousPositions();
-            GameManager.Instance.CheckLava();
-            RevertRewind();
-            checkSwitches();
+            // Revert functionality
+            if (Input.GetKeyDown(KeyCode.E)) // Press 'E' to revert everything
+            {   
+                GameManager.Instance.RevertAllToPreviousPositions();
+                GameManager.Instance.CheckLava();
+                RevertRewind();
+                checkSwitches();
+            }
         }
     }
 
     void Move(Vector2 direction)
     {   
         if (GameManager.Instance.isDead) return;
-
-        Vector2 targetPosition = (Vector2)transform.position + direction;
-        Collider2D blockCollider = Physics2D.OverlapCircle(targetPosition, 0.1f, blockLayer);
+        
+        // In ghost mode, move without updating history or pushing blocks.
+        if (ghostMode)
+        {
+            Vector2 targetPosition = (Vector2)transform.position + direction;
+            // Ghost mode ignores collision checks (or you can check only for walls if desired)
+            transform.position = targetPosition;
+            return;
+        }
+        
+        // Normal movement: check for block pushing, collisions, etc.
+        Vector2 normalTargetPosition = (Vector2)transform.position + direction;
+        Collider2D blockCollider = Physics2D.OverlapCircle(normalTargetPosition, 0.1f, blockLayer);
         if (blockCollider != null)
         {
             Vector2 blockTargetPosition = (Vector2)blockCollider.transform.position + direction;
@@ -73,30 +98,27 @@ public class PlayerController : MonoBehaviour
             if (!IsBlocked(blockTargetPosition))
             {
                 blockCollider.transform.position = blockTargetPosition;
-                transform.position = targetPosition;
+                transform.position = normalTargetPosition;
             }
         }
         else 
         {
-            if (!IsBlocked(targetPosition))
+            if (!IsBlocked(normalTargetPosition))
             {
-                transform.position = targetPosition;
+                transform.position = normalTargetPosition;
             }
         }
 
-        // Update position history after movement
+        // Normal mode: update history, indicators, switches, etc.
         UpdatePositionHistory();
-
-        // Instead of checking switches here, let each SwitchController handle its own activation.
         checkSwitches();
-
-        // Continue with other updates
         UpdateIndicator();
         GameManager.Instance.RevertUpdate();
         CheckWin();
         GameManager.Instance.CheckLava(); // Lava check after movement
     }
 
+    // Existing collision check for normal mode (wall and block layers)
     bool IsBlocked(Vector2 position)
     {
         Collider2D hit = Physics2D.OverlapCircle(position, 0.1f, wallLayer | blockLayer);
@@ -123,6 +145,21 @@ public class PlayerController : MonoBehaviour
                 rewindedIndex += 1;
             }
         }
+    }
+
+    // This function records the position just before the player exits ghost mode.
+    private void UpdatePositionAfterFutureTravel()
+    {
+        // Add the current position to the history list.
+        positionHistory.Add(transform.position);
+
+        // Limit the history size to rewindSteps.
+        rewindIndex += (rewindSteps - 1);
+        if (rewinded)
+        {
+            rewindedIndex += (rewindSteps - 1);
+        }
+        FutureTravelIndex = rewindIndex;
     }
 
     private void UpdateIndicator()
@@ -157,11 +194,21 @@ public class PlayerController : MonoBehaviour
 
     private void RevertRewind()
     {   
+        if (ghostUsed)
+        {
+            if (rewindIndex == FutureTravelIndex)
+            {   
+                rewindIndex -= (rewindSteps - 2);
+                ghostUsed = false;
+                Debug.Log(FutureTravelIndex);
+            }
+        }
         if (!turnOffRewind)
         {
             positionHistory.RemoveAt(positionHistory.Count - 1);
             if (rewindIndex > 0)
             {   
+                
                 rewindIndex -= 1;
                 if (rewindedIndex > 0)
                 {
@@ -171,8 +218,8 @@ public class PlayerController : MonoBehaviour
                 {
                     rewinded = false;
                 }
-                Debug.Log(rewindedIndex);
-                Debug.Log(rewinded);
+                //Debug.Log(rewindedIndex);
+                //Debug.Log(rewinded);
             }
             UpdateIndicator();
         }
@@ -193,6 +240,50 @@ public class PlayerController : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    // NEW: Toggle ghost mode and trigger animator state change.
+    private void ToggleGhostMode()
+    {
+        // If we're not currently in ghost mode...
+        if (!ghostMode)
+        {
+            // Check if ghost mode has already been used this level.
+            if (ghostUsed)
+            {
+                Debug.Log("Ghost mode has already been used in this level.");
+                return;
+            }
+            // Enter ghost mode.
+            ghostMode = true;
+            ghostUsed = true;
+            if (animator != null)
+            {
+                animator.SetBool("IsGhost", ghostMode);
+            }
+        }
+        else // Ghost mode is active, so toggle it off.
+        {
+            // Check if it's valid to exit ghost mode (e.g., ensure player isn't blocked)
+            if (IsBlocked(transform.position))
+            {
+                // If player is in a blocked position, they cannot exit ghost mode.
+                ghostMode = true;
+                Debug.Log("Cannot turn off ghost mode here!");
+                return;
+            }
+            ghostMode = false;
+            if (animator != null)
+            {
+                animator.SetBool("IsGhost", ghostMode);
+            }
+            // Record the position before returning to normal mode.
+            UpdatePositionAfterFutureTravel();
+            UpdateIndicator();
+            checkSwitches();
+            GameManager.Instance.RevertUpdate();
+            GameManager.Instance.CheckLava();
         }
     }
 }
