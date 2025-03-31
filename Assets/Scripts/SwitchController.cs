@@ -4,11 +4,12 @@ public class SwitchController : MonoBehaviour
 {
     public GateController gateController;  // Reference to the GateController script
 
-    public void Active()
+    public void CheckActive()
     {   
-        // Check for overlapping colliders on the "Player" or "Block" layers
         Physics2D.SyncTransforms();
-        Collider2D collisionCollider = Physics2D.OverlapCircle(transform.position, 0.1f, LayerMask.GetMask("Player", "Block"));
+        // Check for overlapping colliders on the "Player" or "Block" layers
+        Debug.Log("Checking for collisions at " + transform.position);
+        Collider2D collisionCollider = Physics2D.OverlapCircle(transform.position, 0.1f, LayerMask.GetMask("Player", "Box"));
         
         if (collisionCollider != null)
         {

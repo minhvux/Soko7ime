@@ -6,9 +6,9 @@ TagManager:
   tags:
   - Goal
   - Wall
-  - Block
   - Lava
   - Switch
+  - Box
   layers:
   - Default
   - TransparentFX
@@ -17,7 +17,7 @@ TagManager:
   - Water
   - UI
   - Player
-  - Block
+  - Box
   - Wall
   - Goal
   - Switch

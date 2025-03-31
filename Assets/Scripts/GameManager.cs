@@ -41,10 +41,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void Test ()
-    {
-        Debug.Log("Test");
-    }
+    
     public void CheckLava()
     {
         if (player != null)
