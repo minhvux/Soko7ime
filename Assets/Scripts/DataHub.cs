@@ -8,7 +8,7 @@ public class DataHub : MonoBehaviour
 
     // Separate event objects
     public GameObject player;
-    public GameObject futurePlayer;
+    public GameObject futurePastPlayer;
     public GameObject pastIndicator;
     public GameObject goalObject;
     public List<GameObject> boxObjects;
@@ -24,11 +24,22 @@ public class DataHub : MonoBehaviour
     public LayerMask goalLayer;
     public LayerMask lavaLayer;
 
+    public bool isMoving = false;
+
+    
+    //private bool rewinded = false;
+
+    public bool isAlive = true;
+
+
+    public bool canRewind = true;
     public int rewindSteps = 7;
     private int rewindIndex = 0;
 
-    public bool isAlive = true;
-    public bool canRewind = true;
+    public bool futureMode = false;
+    public bool canFuture = true;
+    private int futureIndex = 0;
+    
 
     private void Awake()
     {
@@ -43,7 +54,7 @@ public class DataHub : MonoBehaviour
         // Combine objects that need history tracking.
         List<GameObject> eventObjects = new List<GameObject>();
         if (player != null) eventObjects.Add(player);
-        if (futurePlayer != null) eventObjects.Add(futurePlayer);
+        if (futurePastPlayer != null) eventObjects.Add(futurePastPlayer);
         if (pastIndicator != null) eventObjects.Add(pastIndicator);
         if (goalObject != null) eventObjects.Add(goalObject);
         if (boxObjects != null)
@@ -64,6 +75,28 @@ public class DataHub : MonoBehaviour
         }
     }
 
+    public void Move(Vector2 moveDirection)
+    {   
+        
+        if (player != null && player.activeSelf)
+        {   
+            isMoving = true;
+            player.GetComponent<PlayerController>().TryToMove(moveDirection);
+            isMoving = false;
+        }
+        
+        if (futurePastPlayer != null && futurePastPlayer.activeSelf)
+        {   
+            isMoving = true;
+            futurePastPlayer.GetComponent<FuturePastPlayerController>().TryToMove(moveDirection);
+            isMoving = false;
+        }
+        
+        
+        
+    }
+
+
     public void AfterMovingUpdate()
     {
         // Update the position history for all tracked objects.
@@ -77,14 +110,21 @@ public class DataHub : MonoBehaviour
             }
         }
         
+        IncrementRewindIndex();
         UpdateAll();
     }
 
     public void DataHubRewind()
-    {
+    {   
+        if (GetHistoricalPosition(player, rewindSteps) == Vector2.zero)
+        {
+            Debug.Log("No history available for rewind.");
+            return;
+        }
+
         player.transform.position = pastIndicator.transform.position;
-        rewindIndex = -1;
-        
+        canRewind = false;
+        //rewinded = true;
         AfterMovingUpdate();
     
     }
@@ -95,7 +135,8 @@ public class DataHub : MonoBehaviour
         {
             RevertToPreviousPosition(obj);
         }
-        Debug.Log("Reverted all event objects to their previous positions.");
+        //Debug.Log("Reverted all event objects to their previous positions.");
+        DecrementRewindIndex();
         UpdateAll();
        
     }
@@ -120,15 +161,15 @@ public class DataHub : MonoBehaviour
         
         if (!eventPositionHistory.ContainsKey(obj))
         {
-            Debug.LogWarning("No history for object: " + obj.name);
+            //Debug.LogWarning("No history for object: " + obj.name);
             return new Vector2(obj.transform.position.x, obj.transform.position.y);
         }
         
         var historyStack = eventPositionHistory[obj];
         if (historyStack.Count < stepsAgo)
         {   
-            Debug.Log(historyStack.Count + " history for " + obj.name);
-            Debug.LogWarning("Not enough history for " + obj.name);
+            //Debug.Log(historyStack.Count + " history for " + obj.name);
+            //Debug.LogWarning("Not enough history for " + obj.name);
             return Vector2.zero;
         }
         
@@ -139,11 +180,15 @@ public class DataHub : MonoBehaviour
 
     private void UpdateAll(){
         CheckLava(player.transform.position);
+        if(futurePastPlayer.activeSelf) CheckLava(futurePastPlayer.transform.position);
         CheckGoal(player.transform.position);
         CheckSwitches();
-        RewindIndexUpdate();
-        PastIndicatorUpdate();
-        Debug.Log("Rewind index: " + rewindIndex);
+        Debug.Log(canFuture);
+        if(canFuture){
+            
+            RewindIndexUpdate();
+            PastIndicatorUpdate();
+        }
     }
 
     private void CheckLava(Vector2 position)
@@ -201,23 +246,62 @@ public class DataHub : MonoBehaviour
 
     private void RewindIndexUpdate()
     {   
+        //Debug.Log(canRewind);
+        
         if (rewindIndex > 0)
         {
-            rewindIndex--;
             canRewind = false;
             //pastIndicator.SetActive(false);
-            Debug.Log("Rewind index is 0, cannot rewind anymore.");
+            //Debug.Log("Rewind index is 0, cannot rewind anymore.");
         }
         else if (rewindIndex == 0)
         {
             canRewind = true;
+            //rewinded = false;
             //pastIndicator.SetActive(true);
-        } else 
-        {
-            canRewind = false;
-        }
-        if (!canRewind) rewindIndex++;
+        } 
+        
+        
 
         Debug.Log("Rewind index: " + rewindIndex);
+    }
+
+    private void IncrementRewindIndex()
+    {
+        if (!canRewind) 
+        {
+            rewindIndex++;
+            Debug.Log("dcm");
+        }
+    }
+
+    private void DecrementRewindIndex()
+    {
+        if (rewindIndex > 0)
+        {
+            rewindIndex--;
+        }
+    }
+    public void DataHubToFuture()
+    {
+        if (futurePastPlayer != null)
+        {
+            futurePastPlayer.transform.position = player.transform.position;
+            futurePastPlayer.SetActive(true);
+            futureMode = true;
+        }
+        if (pastIndicator != null)
+        {
+            pastIndicator.SetActive(false);
+        }
+    }
+    public void SettleFuture()
+    {   
+        futureMode = false;
+        canFuture = false;
+        AfterMovingUpdate();
+        IncrementRewindIndex();
+    
+        
     }
 }

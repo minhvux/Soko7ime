@@ -95,9 +95,9 @@ GameObject:
   - component: {fileID: 3288534076386423370}
   - component: {fileID: 6510221171499858320}
   - component: {fileID: 300683986415032659}
-  - component: {fileID: -8546906139765253615}
+  - component: {fileID: 4251143914754495700}
   m_Layer: 6
-  m_Name: Past
+  m_Name: Future Past Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -191,7 +191,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.8, y: 0.8}
   m_EdgeRadius: 0
---- !u!114 &-8546906139765253615
+--- !u!114 &4251143914754495700
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -200,12 +200,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 7823631080159578808}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56707ae4bd92f2048a524e87a67b710c, type: 3}
+  m_Script: {fileID: 11500000, guid: f9d8e2863689d0a49be32132fc01a5f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 256
+  moveSpeed: 1
+  bounceDistance: 0.5
+  bounceSpeed: 1

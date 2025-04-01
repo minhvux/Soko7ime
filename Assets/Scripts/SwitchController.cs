@@ -8,7 +8,7 @@ public class SwitchController : MonoBehaviour
     {   
         Physics2D.SyncTransforms();
         // Check for overlapping colliders on the "Player" or "Block" layers
-        Debug.Log("Checking for collisions at " + transform.position);
+        //Debug.Log("Checking for collisions at " + transform.position);
         Collider2D collisionCollider = Physics2D.OverlapCircle(transform.position, 0.1f, LayerMask.GetMask("Player", "Box"));
         
         if (collisionCollider != null)

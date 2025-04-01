@@ -2,22 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
-{   
-
-    public float moveSpeed = 1f;
-    public float bounceDistance = 0.5f;
-    public float bounceSpeed = 1f;
-
+public class FuturePastPlayerController : MonoBehaviour
+{
     
 
-    private Vector2 targetPosition;
+    public float moveSpeed = 6f;
+    public float bounceDistance = 0.9f;
+    public float bounceSpeed = 1.5f;
 
+    private Vector2 targetPosition;
+    
+    
+    // Start is called before the first frame update
     public void TryToMove(Vector2 moveDirection)
     {   
+        if (DataHub.Instance.futureMode) return;
         targetPosition = (Vector2)transform.position + moveDirection;
         Collider2D hit = IsBlocked(targetPosition);
-        if (hit == null || DataHub.Instance.futureMode)
+        if (hit == null)
         {
             StartCoroutine(MoveToPosition(targetPosition));
         }
@@ -40,7 +42,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator MoveToPosition(Vector2 target)
     {
-       
+        
 
         while (Vector2.Distance(a:transform.position, b:target) > 0.01f)
         {
@@ -49,17 +51,14 @@ public class PlayerController : MonoBehaviour
         }
       
         transform.position = target;
-       
+        
 
-        if (!DataHub.Instance.futureMode) 
-        {
-            DataHub.Instance.AfterMovingUpdate();
-        }
+        
     }
 
     private IEnumerator StaticBounce(Vector2 target)
     {
-       
+        
         Vector2 currentPosition = transform.position;
 
         while (Vector2.Distance(a:transform.position, b:target) > bounceDistance)
@@ -69,7 +68,7 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.position = currentPosition;
-       
+        
 
     }
 
@@ -77,27 +76,5 @@ public class PlayerController : MonoBehaviour
     {
         Collider2D hit = Physics2D.OverlapCircle(position, 0.1f, DataHub.Instance.wallLayer | DataHub.Instance.blockLayer);
         return hit;
-    }
-
-    public void ToggleFutureMode()
-    {
-        // If not in future mode, enable it.
-        if (!DataHub.Instance.futureMode)
-        {
-            DataHub.Instance.DataHubToFuture();
-            
-        }
-        else
-        {
-            if (IsBlocked(transform.position) != null)
-            {
-                Debug.Log("Cannot settle here – the location overlaps with an obstacle.");
-            }           
-            
-            else
-            {
-                DataHub.Instance.SettleFuture();
-            }
-        }
     }
 }

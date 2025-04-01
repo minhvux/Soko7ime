@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BoxController : MonoBehaviour
 {   
-    private bool isMoving = false;
+
     public float moveSpeed = 6f;
 
     public bool TryToPushBox(Vector2 moveDirection)
@@ -23,7 +23,7 @@ public class BoxController : MonoBehaviour
 
     private IEnumerator MoveToPosition(Vector2 target)
     {
-        isMoving = true;
+        
 
         while (Vector2.Distance(a:transform.position, b:target) > 0.01f)
         {
@@ -32,7 +32,7 @@ public class BoxController : MonoBehaviour
         }
 
         transform.position = target;
-        isMoving = false;
+        
     }
 
     private bool IsBlocked(Vector2 position)
