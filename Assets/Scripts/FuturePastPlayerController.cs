@@ -13,10 +13,12 @@ public class FuturePastPlayerController : MonoBehaviour
     private Vector2 targetPosition;
     
     
+    
     // Start is called before the first frame update
     public void TryToMove(Vector2 moveDirection)
     {   
         if (DataHub.Instance.futureMode) return;
+        
         targetPosition = (Vector2)transform.position + moveDirection;
         Collider2D hit = IsBlocked(targetPosition);
         if (hit == null)
@@ -42,8 +44,8 @@ public class FuturePastPlayerController : MonoBehaviour
 
     private IEnumerator MoveToPosition(Vector2 target)
     {
+        DataHub.Instance.ReportMoveStarted(); 
         
-
         while (Vector2.Distance(a:transform.position, b:target) > 0.01f)
         {
             transform.position = Vector2.MoveTowards(transform.position, target, moveSpeed *  Time.deltaTime);
@@ -52,12 +54,14 @@ public class FuturePastPlayerController : MonoBehaviour
       
         transform.position = target;
         
-
+        
+        DataHub.Instance.ReportMoveComplete();
         
     }
 
     private IEnumerator StaticBounce(Vector2 target)
     {
+        DataHub.Instance.ReportMoveStarted(); 
         
         Vector2 currentPosition = transform.position;
 
@@ -69,7 +73,7 @@ public class FuturePastPlayerController : MonoBehaviour
 
         transform.position = currentPosition;
         
-
+        DataHub.Instance.ReportMoveComplete();
     }
 
     private Collider2D IsBlocked(Vector2 position)

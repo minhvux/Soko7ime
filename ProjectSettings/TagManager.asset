@@ -9,6 +9,7 @@ TagManager:
   - Lava
   - Switch
   - Box
+  - FuturePast
   layers:
   - Default
   - TransparentFX

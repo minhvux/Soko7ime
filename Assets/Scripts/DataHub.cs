@@ -11,6 +11,7 @@ public class DataHub : MonoBehaviour
     public GameObject futurePastPlayer;
     public GameObject pastIndicator;
     public GameObject goalObject;
+    public GameObject futureIndicator;
     public List<GameObject> boxObjects;
 
     // Switches are maintained separately.
@@ -23,13 +24,15 @@ public class DataHub : MonoBehaviour
     public LayerMask wallLayer;
     public LayerMask goalLayer;
     public LayerMask lavaLayer;
+    public LayerMask playerLayer;
 
-    public bool isMoving = false;
 
     
     //private bool rewinded = false;
 
     public bool isAlive = true;
+    public bool isMoving = false;
+    private int pendingMoves = 0;
 
 
     public bool canRewind = true;
@@ -38,7 +41,7 @@ public class DataHub : MonoBehaviour
 
     public bool futureMode = false;
     public bool canFuture = true;
-    private int futureIndex = 0;
+    public int futureIndex = 0;
     
 
     private void Awake()
@@ -80,19 +83,36 @@ public class DataHub : MonoBehaviour
         
         if (player != null && player.activeSelf)
         {   
-            isMoving = true;
             player.GetComponent<PlayerController>().TryToMove(moveDirection);
-            isMoving = false;
         }
         
         if (futurePastPlayer != null && futurePastPlayer.activeSelf)
         {   
-            isMoving = true;
             futurePastPlayer.GetComponent<FuturePastPlayerController>().TryToMove(moveDirection);
-            isMoving = false;
         }
         
         
+        
+    }
+
+    public void ReportMoveStarted()
+    {
+        pendingMoves++;
+        isMoving = true;
+    }
+
+    public void ReportMoveComplete()
+    {
+        pendingMoves--;
+        // When all moves are complete, update history once.
+        if (pendingMoves <= 0)
+        {   
+            isMoving = false;
+            if (!futureMode)
+            {
+                AfterMovingUpdate();
+            }
+        }
         
     }
 
@@ -111,18 +131,27 @@ public class DataHub : MonoBehaviour
         }
         
         IncrementRewindIndex();
+        //if (!canFuture) futureIndex++;
         UpdateAll();
     }
 
     public void DataHubRewind()
     {   
-        if (GetHistoricalPosition(player, rewindSteps) == Vector2.zero)
+        if (GetHistoricalPosition(player, rewindSteps) == Vector2.zero && canFuture)
         {
             Debug.Log("No history available for rewind.");
             return;
         }
 
-        player.transform.position = pastIndicator.transform.position;
+        if (canFuture)
+        {
+            player.transform.position = pastIndicator.transform.position;
+        }
+        else
+        {
+            player.transform.position = futurePastPlayer.transform.position;
+            futurePastPlayer.SetActive(false);
+        }
         canRewind = false;
         //rewinded = true;
         AfterMovingUpdate();
@@ -137,7 +166,10 @@ public class DataHub : MonoBehaviour
         }
         //Debug.Log("Reverted all event objects to their previous positions.");
         DecrementRewindIndex();
+        futureIndicator.GetComponent<FutureIndicator>().revertFutureIndicator();
         UpdateAll();
+        
+        
        
     }
 
@@ -155,7 +187,7 @@ public class DataHub : MonoBehaviour
     {
         if (obj == null)
         {
-            Debug.LogWarning("Provided object is null.");
+            //Debug.LogWarning("Provided object is null.");
             return Vector2.zero;
         }
         
@@ -180,15 +212,15 @@ public class DataHub : MonoBehaviour
 
     private void UpdateAll(){
         CheckLava(player.transform.position);
-        if(futurePastPlayer.activeSelf) CheckLava(futurePastPlayer.transform.position);
+        if(futurePastPlayer.activeSelf && isAlive) CheckLava(futurePastPlayer.transform.position);
         CheckGoal(player.transform.position);
-        CheckSwitches();
-        Debug.Log(canFuture);
-        if(canFuture){
-            
-            RewindIndexUpdate();
-            PastIndicatorUpdate();
-        }
+        if(!canFuture) futureIndicator.GetComponent<FutureIndicator>().CheckActive();
+        CheckSwitches();        
+        RewindIndexUpdate();
+
+        if(futureIndex == 0 && !futureMode) PastIndicatorUpdate();
+        //Debug.Log("Future index: " + futureIndex);
+        
     }
 
     private void CheckLava(Vector2 position)
@@ -247,23 +279,45 @@ public class DataHub : MonoBehaviour
     private void RewindIndexUpdate()
     {   
         //Debug.Log(canRewind);
-        
+        Debug.Log(rewindIndex);
         if (rewindIndex > 0)
         {
             canRewind = false;
-            //pastIndicator.SetActive(false);
-            //Debug.Log("Rewind index is 0, cannot rewind anymore.");
+            
         }
         else if (rewindIndex == 0)
-        {
+        {   
+            if (!canFuture)
+            {   
+
+                if (futureIndicator.GetComponent<FutureIndicator>().isActive) futurePastPlayer.SetActive(true);
+                
+            }
             canRewind = true;
+            
             //rewinded = false;
             //pastIndicator.SetActive(true);
         } 
+
+        if (futureIndex > 0)
+        {
+            canFuture = false;
+            
+        }
+        else if (futureIndex == 0)
+        {   
+            if (!canFuture)
+            {
+                futurePastPlayer.SetActive(false);
+            }
+            canFuture = true;
+            futureIndicator.SetActive(false);
+            
+        }
         
         
 
-        Debug.Log("Rewind index: " + rewindIndex);
+        
     }
 
     private void IncrementRewindIndex()
@@ -271,7 +325,12 @@ public class DataHub : MonoBehaviour
         if (!canRewind) 
         {
             rewindIndex++;
-            Debug.Log("dcm");
+            
+        }
+
+        if (!canFuture)
+        {
+            futureIndex++;
         }
     }
 
@@ -281,7 +340,13 @@ public class DataHub : MonoBehaviour
         {
             rewindIndex--;
         }
+
+        if (futureIndex > 0)
+        {
+            futureIndex--;
+        }
     }
+
     public void DataHubToFuture()
     {
         if (futurePastPlayer != null)
@@ -298,10 +363,17 @@ public class DataHub : MonoBehaviour
     public void SettleFuture()
     {   
         futureMode = false;
+        //Debug.Log(canFuture);
         canFuture = false;
-        AfterMovingUpdate();
-        IncrementRewindIndex();
-    
+        futureIndicator.transform.position = player.transform.position;
+        futureIndicator.SetActive(true);
+        AfterMovingUpdate();  
+
+    }
+
+    public void DeactivateFuturePastPlayer()
+    {
+        futurePastPlayer.SetActive(false);
         
     }
 }

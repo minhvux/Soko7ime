@@ -11,10 +11,13 @@ public class PlayerController : MonoBehaviour
 
     
 
+    
+
     private Vector2 targetPosition;
 
     public void TryToMove(Vector2 moveDirection)
     {   
+        
         targetPosition = (Vector2)transform.position + moveDirection;
         Collider2D hit = IsBlocked(targetPosition);
         if (hit == null || DataHub.Instance.futureMode)
@@ -39,27 +42,23 @@ public class PlayerController : MonoBehaviour
     }
 
     private IEnumerator MoveToPosition(Vector2 target)
-    {
+    {   
+        DataHub.Instance.ReportMoveStarted();
        
-
         while (Vector2.Distance(a:transform.position, b:target) > 0.01f)
         {
             transform.position = Vector2.MoveTowards(transform.position, target, moveSpeed *  Time.deltaTime);
             yield return null;
         }
       
-        transform.position = target;
-       
-
-        if (!DataHub.Instance.futureMode) 
-        {
-            DataHub.Instance.AfterMovingUpdate();
-        }
+        transform.position = target;       
+        
+        DataHub.Instance.ReportMoveComplete();
     }
 
     private IEnumerator StaticBounce(Vector2 target)
     {
-       
+        DataHub.Instance.ReportMoveStarted();
         Vector2 currentPosition = transform.position;
 
         while (Vector2.Distance(a:transform.position, b:target) > bounceDistance)
@@ -69,6 +68,7 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.position = currentPosition;
+        DataHub.Instance.ReportMoveComplete();
        
 
     }

@@ -30,7 +30,7 @@ public class InputManager : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.Q) && DataHub.Instance.canRewind)
             {
-                pastIndicatorController.Rewind();
+                DataHub.Instance.DataHubRewind();
             }
             if (Input.GetKeyDown(KeyCode.E) && DataHub.Instance.canFuture)
             {

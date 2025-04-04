@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class PastIndicatorController : MonoBehaviour
 {
-    public void Rewind()
-    {   
-        DataHub.Instance.DataHubRewind();
+    public void Move(Vector2 moveDirection)
+    {
+        Vector2 targetPosition = (Vector2)transform.position + moveDirection;
+        transform.position = targetPosition;
     }
+    
 }
