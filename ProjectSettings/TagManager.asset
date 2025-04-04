@@ -56,3 +56,6 @@ TagManager:
   - name: Player
     uniqueID: 3785946315
     locked: 0
+  - name: Indicator
+    uniqueID: 2391754613
+    locked: 0

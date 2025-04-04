@@ -143,15 +143,9 @@ public class DataHub : MonoBehaviour
             return;
         }
 
-        if (canFuture)
-        {
-            player.transform.position = pastIndicator.transform.position;
-        }
-        else
-        {
-            player.transform.position = futurePastPlayer.transform.position;
-            futurePastPlayer.SetActive(false);
-        }
+       
+        player.transform.position = pastIndicator.transform.position;
+        
         canRewind = false;
         //rewinded = true;
         AfterMovingUpdate();
@@ -218,7 +212,7 @@ public class DataHub : MonoBehaviour
         CheckSwitches();        
         RewindIndexUpdate();
 
-        if(futureIndex == 0 && !futureMode) PastIndicatorUpdate();
+        if(!futureMode) PastIndicatorUpdate();
         //Debug.Log("Future index: " + futureIndex);
         
     }
@@ -243,6 +237,7 @@ public class DataHub : MonoBehaviour
         if (hit != null)
         {
             Debug.Log("win");
+            GameManager.Instance.LevelComplete();
         }
     }
 
@@ -259,7 +254,14 @@ public class DataHub : MonoBehaviour
         if (pastIndicator != null)
         {
             if (canRewind)
-            {
+            {   
+                //Debug.Log("Can rewind: " + canRewind);
+                if (!canFuture && futureIndicator.GetComponent<FutureIndicator>().isActive)
+                {   
+                    pastIndicator.SetActive(true);
+                    pastIndicator.transform.position = futurePastPlayer.transform.position;
+                    return;
+                }
                 Vector2 pastPosition = GetHistoricalPosition(player, rewindSteps);
                 if (pastPosition == Vector2.zero)
                 {
@@ -279,7 +281,7 @@ public class DataHub : MonoBehaviour
     private void RewindIndexUpdate()
     {   
         //Debug.Log(canRewind);
-        Debug.Log(rewindIndex);
+        //Debug.Log(rewindIndex);
         if (rewindIndex > 0)
         {
             canRewind = false;

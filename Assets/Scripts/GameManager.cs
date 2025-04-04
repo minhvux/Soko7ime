@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
+    public bool paradox = false; 
 
     private void Awake()
     {
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     public void Paradox()
     {
         Debug.Log("Paradox!");
+        paradox = true;
         // Optionally add effects or delays here.
     }
 

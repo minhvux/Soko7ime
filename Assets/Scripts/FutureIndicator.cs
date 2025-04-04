@@ -88,13 +88,17 @@ public class FutureIndicator : MonoBehaviour
     public void revertFutureIndicator()
     {   
         if (DataHub.Instance.canFuture) return;
+        CheckParadox();
         if (paradoxIndex <= stepBeforeParadox)
         {   
             paradoxIndex = stepBeforeParadox;
             isActive = true;
+            GameManager.Instance.paradox = false;
             gameObject.SetActive(true);
+            Debug.Log("Reverted Future Indicator");
+            Debug.Log(GameManager.Instance.paradox);
         } 
-        CheckParadox();
+        
         CheckActive();
         
     }

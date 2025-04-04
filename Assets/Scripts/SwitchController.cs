@@ -4,6 +4,13 @@ public class SwitchController : MonoBehaviour
 {
     public GateController gateController;  // Reference to the GateController script
 
+
+    private void Start()
+    {
+        // Ensure the gateController is assigned in the inspector or find it dynamically
+        CheckActive();
+    }
+
     public void CheckActive()
     {   
         Physics2D.SyncTransforms();

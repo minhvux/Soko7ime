@@ -11,7 +11,7 @@ public class InputManager : MonoBehaviour
     {
         if (DataHub.Instance.isMoving) return;
         
-        if (DataHub.Instance.isAlive == true){            
+        if (DataHub.Instance.isAlive && !GameManager.Instance.paradox){            
             if (Input.GetKeyDown(KeyCode.W))
             {
                 DataHub.Instance.Move(Vector2.up);                   
