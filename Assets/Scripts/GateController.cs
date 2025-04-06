@@ -1,43 +1,38 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GateController : MonoBehaviour
 {
-    public GameObject gate;  // The gate object to be activated/deactivated
-    private bool isGateActive = true;  // Gate is initially active
+    // The gate object that blocks the level; when open, we disable it.
+    public GameObject gate;
+    // List of switches controlling this gate - assign them in the Inspector.
+    public List<SwitchController> switches;
 
     void Start()
     {
-        // Ensure the gate is active at the start
+        // Ensure the gate is active (closed) at the start.
         if (gate != null)
         {
-            gate.SetActive(isGateActive);
+            gate.SetActive(true);
         }
     }
 
-    // Method to activate or deactivate the gate based on the switch status
-    public void ToggleGateState(bool isSwitchActive)
+    // This method is called by switches whenever their state updates.
+    public void UpdateGateState()
     {
-        if (gate != null)
+        bool allActivated = true;
+        foreach (SwitchController sw in switches)
         {
-            // If the switch is active, deactivate the gate, else activate it
-            gate.SetActive(!isSwitchActive);
-        }
-    }
-
-    // This method will be called to check for collisions with the gate
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        // Check if the object colliding with the gate is the switch
-        if (other.CompareTag("Switch"))
-        {
-            // Call the ToggleGateState method to update the gate's state based on the switch's state
-            SwitchController switchController = other.GetComponent<SwitchController>();
-            if (switchController != null)
+            if (sw == null || !sw.isActivated)
             {
-                // You can pass the switch's active state to the gate here
-                bool isSwitchActive = (switchController != null);
-                ToggleGateState(isSwitchActive);
+                allActivated = false;
+                break;
             }
+        }
+        // Gate is open (disabled) only when all switches are activated; otherwise it is closed (active).
+        if (gate != null)
+        {
+            gate.SetActive(!allActivated);
         }
     }
 }

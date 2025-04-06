@@ -28,6 +28,13 @@ public class GameManager : MonoBehaviour
         // Optionally add effects or delays here.
     }
 
+    public void NoParadox()
+    {
+        Debug.Log("No Paradox!");
+        paradox = false;
+        // Optionally add effects or delays here.
+    }
+
     // Call this function when the level is completed.
     public void LevelComplete()
     {

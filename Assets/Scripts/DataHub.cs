@@ -147,6 +147,10 @@ public class DataHub : MonoBehaviour
         player.transform.position = pastIndicator.transform.position;
         
         canRewind = false;
+
+        if (!canFuture){
+            futurePastPlayer.SetActive(false);
+        }
         //rewinded = true;
         AfterMovingUpdate();
     
@@ -208,6 +212,8 @@ public class DataHub : MonoBehaviour
         CheckLava(player.transform.position);
         if(futurePastPlayer.activeSelf && isAlive) CheckLava(futurePastPlayer.transform.position);
         CheckGoal(player.transform.position);
+        CheckParadox(player.transform.position);
+        if(futurePastPlayer.activeSelf && isAlive) CheckParadox(futurePastPlayer.transform.position);
         if(!canFuture) futureIndicator.GetComponent<FutureIndicator>().CheckActive();
         CheckSwitches();        
         RewindIndexUpdate();
@@ -218,7 +224,8 @@ public class DataHub : MonoBehaviour
     }
 
     private void CheckLava(Vector2 position)
-    {
+    {   
+        Physics2D.SyncTransforms();
         Collider2D hit = Physics2D.OverlapCircle(position, 0.1f, lavaLayer);
         if (hit != null)
         {
@@ -240,6 +247,22 @@ public class DataHub : MonoBehaviour
             GameManager.Instance.LevelComplete();
         }
     }
+
+    private void CheckParadox(Vector2 position)
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(position, 0.1f, playerLayer | blockLayer | wallLayer);
+        if (hits.Length > 1)
+        {
+            Debug.Log("Paradox detected at " + position);
+            GameManager.Instance.Paradox();
+        }
+        else 
+        {
+            GameManager.Instance.NoParadox();
+        }
+    }
+
+    
 
     private void CheckSwitches()
     {
