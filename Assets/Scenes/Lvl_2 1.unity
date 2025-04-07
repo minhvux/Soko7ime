@@ -2320,6 +2320,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1026171969 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5465997046694533094, guid: d85dc3cba32ae744498d1a9e60cbc8f5, type: 3}
+  m_PrefabInstance: {fileID: 227782315}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1102546593
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2887,6 +2892,7 @@ MonoBehaviour:
   playerController: {fileID: 767089659}
   pastIndicatorController: {fileID: 1637024104}
   futurePastPlayerController: {fileID: 20218582}
+  actionDelay: 0.24
 --- !u!114 &1564458893 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4897859516251840251, guid: f23700938d5814446bc361ad869b67eb, type: 3}
@@ -12944,6 +12950,7 @@ MonoBehaviour:
   futureIndicator: {fileID: 438807977}
   boxObjects:
   - {fileID: 1915828255}
+  - {fileID: 1026171969}
   switchControllers:
   - {fileID: 1635660365}
   - {fileID: 1564458893}

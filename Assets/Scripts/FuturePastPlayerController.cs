@@ -11,12 +11,16 @@ public class FuturePastPlayerController : MonoBehaviour
     public float bounceSpeed = 1.5f;
 
     private Vector2 targetPosition;
+    private Animator animator;
+    public GameObject runTrailParticlePrefab; 
+    public GameObject RewindBurstParticlePrefab; 
     
     
     
     // Start is called before the first frame update
     public void TryToMove(Vector2 moveDirection)
     {   
+        runTrailParticlePrefab.SetActive(true);
         if (DataHub.Instance.futureMode) return;
         
         targetPosition = (Vector2)transform.position + moveDirection;

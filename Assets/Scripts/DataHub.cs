@@ -143,8 +143,8 @@ public class DataHub : MonoBehaviour
             return;
         }
 
-       
-        player.transform.position = pastIndicator.transform.position;
+        player.GetComponent<PlayerController>().PlayerRewind();
+        
         
         canRewind = false;
 
@@ -152,7 +152,7 @@ public class DataHub : MonoBehaviour
             futurePastPlayer.SetActive(false);
         }
         //rewinded = true;
-        AfterMovingUpdate();
+       
     
     }
 
@@ -163,6 +163,7 @@ public class DataHub : MonoBehaviour
             RevertToPreviousPosition(obj);
         }
         //Debug.Log("Reverted all event objects to their previous positions.");
+        player.GetComponent<PlayerController>().PlayerRevert();
         DecrementRewindIndex();
         futureIndicator.GetComponent<FutureIndicator>().revertFutureIndicator();
         UpdateAll();
