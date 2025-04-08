@@ -69,12 +69,13 @@ public class FutureIndicator : MonoBehaviour
 
     private void CheckParadox()
     {   
-        
         // Update the text if the component is assigned.
         if (paradoxText != null)
         {
             paradoxText.text = paradoxIndex.ToString();
         }
+
+        if (!isActive) return;
 
         if (paradoxIndex == 0)
         {

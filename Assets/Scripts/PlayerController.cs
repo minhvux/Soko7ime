@@ -10,23 +10,23 @@ public class PlayerController : MonoBehaviour
     public float bounceSpeed = 1f;
     
     private Vector2 targetPosition;
-    private Animator animator;
+    public Animator animator;
     public GameObject runTrailParticlePrefab; 
     public GameObject RewindBurstParticlePrefab; 
+    public GameObject SettleFutureParticlePrefab; 
 
     public float rewindDelayBefore = 1f; // Delay before changing the position
     public float rewindDelayAfter = 1f;
+
+    
+    public float SettleFutureDelay = 0.5f;
     
 
-    void Start()
-    {
-        // Get the Animator component from the player
-        animator = GetComponent<Animator>();
-    }
+    
 
     public void TryToMove(Vector2 moveDirection)
     {   
-        runTrailParticlePrefab.SetActive(true);
+        if (!DataHub.Instance.futureMode) runTrailParticlePrefab.SetActive(true);
         if (moveDirection.x < 0)
         {
             // Moving left, flip the character horizontally
@@ -123,27 +123,7 @@ public class PlayerController : MonoBehaviour
         return hit;
     }
 
-    public void ToggleFutureMode()
-    {
-        // If not in future mode, enable it.
-        if (!DataHub.Instance.futureMode)
-        {
-            DataHub.Instance.DataHubToFuture();
-            
-        }
-        else
-        {
-            if (IsBlocked(transform.position) != null)
-            {
-                Debug.Log("Cannot settle here – the location overlaps with an obstacle.");
-            }           
-            
-            else
-            {
-                DataHub.Instance.SettleFuture();
-            }
-        }
-    }
+    
 
     public void PlayerRewind()
     {
@@ -175,10 +155,47 @@ public class PlayerController : MonoBehaviour
     public void PlayerRevert()
     {
         
-        runTrailParticlePrefab.SetActive(false);
-       
-        
-    
-       
+        runTrailParticlePrefab.SetActive(false); 
     }
+
+    public void PlayerToFuture()
+    {
+       
+        runTrailParticlePrefab.SetActive(false);
+        animator.SetBool("ToFuture", true);
+        
+        
+        
+        
+        
+    }
+
+   
+
+    public void PlayerSettleFuture()
+    {
+        StartCoroutine(SettleFuture());
+        
+    }
+
+    private IEnumerator SettleFuture()
+    {
+        DataHub.Instance.ReportMoveStarted();
+
+        animator.SetBool("ToFuture", false);
+        animator.SetBool("SettleFuture", true);
+
+        Debug.Log("Settle future called");
+
+        SettleFutureParticlePrefab.SetActive(true);
+        
+        yield return new WaitForSeconds(SettleFutureDelay);
+
+        animator.SetBool("SettleFuture", false);
+        SettleFutureParticlePrefab.SetActive(false);
+        
+        DataHub.Instance.ReportMoveComplete();
+    }
+
+    
 }

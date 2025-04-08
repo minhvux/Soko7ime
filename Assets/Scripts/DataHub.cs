@@ -137,6 +137,7 @@ public class DataHub : MonoBehaviour
 
     public void DataHubRewind()
     {   
+
         if (GetHistoricalPosition(player, rewindSteps) == Vector2.zero && canFuture)
         {
             Debug.Log("No history available for rewind.");
@@ -144,6 +145,7 @@ public class DataHub : MonoBehaviour
         }
 
         player.GetComponent<PlayerController>().PlayerRewind();
+        
         
         
         canRewind = false;
@@ -164,6 +166,7 @@ public class DataHub : MonoBehaviour
         }
         //Debug.Log("Reverted all event objects to their previous positions.");
         player.GetComponent<PlayerController>().PlayerRevert();
+        futurePastPlayer.GetComponent<FuturePastPlayerController>().FuturePastPlayerRevert();
         DecrementRewindIndex();
         futureIndicator.GetComponent<FutureIndicator>().revertFutureIndicator();
         UpdateAll();
@@ -213,10 +216,11 @@ public class DataHub : MonoBehaviour
         CheckLava(player.transform.position);
         if(futurePastPlayer.activeSelf && isAlive) CheckLava(futurePastPlayer.transform.position);
         CheckGoal(player.transform.position);
+        
+        CheckSwitches();    
         CheckParadox(player.transform.position);
-        if(futurePastPlayer.activeSelf && isAlive) CheckParadox(futurePastPlayer.transform.position);
-        if(!canFuture) futureIndicator.GetComponent<FutureIndicator>().CheckActive();
-        CheckSwitches();        
+        if(futurePastPlayer.activeSelf && isAlive && !GameManager.Instance.paradox) CheckParadox(futurePastPlayer.transform.position);
+        if(!canFuture) futureIndicator.GetComponent<FutureIndicator>().CheckActive();    
         RewindIndexUpdate();
 
         if(!futureMode) PastIndicatorUpdate();
@@ -250,16 +254,19 @@ public class DataHub : MonoBehaviour
     }
 
     private void CheckParadox(Vector2 position)
-    {
+    { 
+        
         Collider2D[] hits = Physics2D.OverlapCircleAll(position, 0.1f, playerLayer | blockLayer | wallLayer);
         if (hits.Length > 1)
         {
             Debug.Log("Paradox detected at " + position);
             GameManager.Instance.Paradox();
+            
         }
         else 
         {
             GameManager.Instance.NoParadox();
+            
         }
     }
 
@@ -373,6 +380,34 @@ public class DataHub : MonoBehaviour
         }
     }
 
+
+    public void DataHubToggleFuture()
+    {   
+        
+        // If not in future mode, enable it.
+        if (!futureMode)
+        {   
+            AfterMovingUpdate();
+            DataHubToFuture();
+
+        }
+        else
+        {   
+            CheckParadox(player.transform.position);
+            if (GameManager.Instance.paradox) 
+            {
+                Debug.Log("Cannot settle here – the location overlaps with an obstacle.");
+                GameManager.Instance.NoParadox();
+            }           
+            else
+            {
+                SettleFuture();
+            }
+        }
+
+        
+    }
+
     public void DataHubToFuture()
     {
         if (futurePastPlayer != null)
@@ -380,6 +415,9 @@ public class DataHub : MonoBehaviour
             futurePastPlayer.transform.position = player.transform.position;
             futurePastPlayer.SetActive(true);
             futureMode = true;
+
+            player.GetComponent<PlayerController>().PlayerToFuture();
+            futurePastPlayer.GetComponent<FuturePastPlayerController>().FuturePastPlayerToFuture();
         }
         if (pastIndicator != null)
         {
@@ -393,7 +431,10 @@ public class DataHub : MonoBehaviour
         canFuture = false;
         futureIndicator.transform.position = player.transform.position;
         futureIndicator.SetActive(true);
-        AfterMovingUpdate();  
+
+        player.GetComponent<PlayerController>().PlayerSettleFuture();
+        futurePastPlayer.GetComponent<FuturePastPlayerController>().FuturePastPlayerSettleFuture();
+         
 
     }
 

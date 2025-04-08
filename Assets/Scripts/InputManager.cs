@@ -11,9 +11,35 @@ public class InputManager : MonoBehaviour
     public float actionDelay = 0.2f;
     private float nextActionTime = 0f;
 
+    private float rKeyDownTime = 0f;
+    private bool isRKeyHeld = false;
+    public float resetTime = .5f; 
+
     void Update()
     {   
-        
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            rKeyDownTime = Time.time;
+            isRKeyHeld = true;
+        }
+        if (Input.GetKey(KeyCode.R) && isRKeyHeld)
+        {
+            if (Time.time - rKeyDownTime >= resetTime)
+            {
+                // Restart the level
+                GameManager.Instance.RestartLevel();
+                isRKeyHeld = false; // Prevent further restart calls
+                return;
+            }
+        }
+        if (Input.GetKeyUp(KeyCode.R))
+        {
+            isRKeyHeld = false;
+        }
+
+
+
+
         if (DataHub.Instance.isMoving) return;
         
         if (DataHub.Instance.isAlive && !GameManager.Instance.paradox)
@@ -44,7 +70,7 @@ public class InputManager : MonoBehaviour
                 } else
 
                 // Handle Rewind (Q)
-                if (Input.GetKeyDown(KeyCode.Q) && DataHub.Instance.canRewind)
+                if (Input.GetKeyDown(KeyCode.Q) && DataHub.Instance.canRewind && !DataHub.Instance.futureMode)
                 {
                     DataHub.Instance.DataHubRewind();
                     nextActionTime = Time.time + actionDelay;
@@ -53,7 +79,7 @@ public class InputManager : MonoBehaviour
                 // Handle Future Mode (E)
                 if (Input.GetKeyDown(KeyCode.E) && DataHub.Instance.canFuture)
                 {
-                    playerController.ToggleFutureMode();
+                    DataHub.Instance.DataHubToggleFuture();
                     nextActionTime = Time.time + actionDelay;
                 }
             }
@@ -61,7 +87,8 @@ public class InputManager : MonoBehaviour
 
         // Handle reverting all positions (Z)
         if (Input.GetKey(KeyCode.Z))
-        {
+        {   
+            if (DataHub.Instance.futureMode) DataHub.Instance.SettleFuture();
             if (Time.time >= nextActionTime)
             {
                 DataHub.Instance.RevertAllToPreviousPositions();
