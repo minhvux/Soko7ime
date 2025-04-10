@@ -79,7 +79,7 @@ public class InputManager : MonoBehaviour
                 // Handle Future Mode (E)
                 if (Input.GetKeyDown(KeyCode.E) && DataHub.Instance.canFuture)
                 {
-                    DataHub.Instance.DataHubToggleFuture();
+                    //DataHub.Instance.DataHubToggleFuture();
                     nextActionTime = Time.time + actionDelay;
                 }
             }
