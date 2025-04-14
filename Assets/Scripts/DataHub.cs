@@ -53,13 +53,13 @@ public class DataHub : MonoBehaviour
     }
 
     void Start()
-    {
+    {   
+        pastIndicator.transform.position = player.transform.position;
         // Combine objects that need history tracking.
         List<GameObject> eventObjects = new List<GameObject>();
         if (player != null) eventObjects.Add(player);
         if (futurePastPlayer != null) eventObjects.Add(futurePastPlayer);
         if (pastIndicator != null) eventObjects.Add(pastIndicator);
-        if (goalObject != null) eventObjects.Add(goalObject);
         if (boxObjects != null)
         {
             foreach (var box in boxObjects)
@@ -249,7 +249,8 @@ public class DataHub : MonoBehaviour
         if (hit != null)
         {
             Debug.Log("win");
-            GameManager.Instance.LevelComplete();
+            player.GetComponent<PlayerController>().Win();
+            goalObject.GetComponent<Goal>().WinMove();
         }
     }
 
@@ -296,7 +297,7 @@ public class DataHub : MonoBehaviour
                 Vector2 pastPosition = GetHistoricalPosition(player, rewindSteps);
                 if (pastPosition == Vector2.zero)
                 {
-                    pastIndicator.SetActive(false);
+                    pastIndicator.SetActive(true);
                     return;
                 }
                 pastIndicator.SetActive(true);

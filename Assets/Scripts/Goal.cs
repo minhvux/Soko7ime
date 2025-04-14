@@ -1,12 +1,22 @@
 using UnityEngine;
+using System.Collections;
 
 public class Goal : MonoBehaviour
-{
-    public void CheckPlayerPosition(Vector3 playerPosition)
+{   
+    public float WinDelay = 1f;
+    public GameObject WinParticlePrefab; 
+    
+    // Prefab for the win particle effect
+    public void WinMove()
     {
-        if (Vector3.Distance(playerPosition, transform.position) < 0.1f)
-        {
-            GameManager.Instance.LevelComplete();
-        }
+        StartCoroutine(Win());
+    }
+    private IEnumerator Win()
+    {
+        DataHub.Instance.ReportMoveStarted();
+        WinParticlePrefab.SetActive(true);
+        yield return new WaitForSeconds(WinDelay);
+        DataHub.Instance.ReportMoveComplete();
+        GameManager.Instance.LevelComplete();
     }
 }

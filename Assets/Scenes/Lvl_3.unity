@@ -4267,7 +4267,7 @@ MonoBehaviour:
     m_Bits: 64
   isAlive: 1
   isMoving: 0
-  canRewind: 1
+  canRewind: 0
   rewindSteps: 7
   futureMode: 0
   canFuture: 1

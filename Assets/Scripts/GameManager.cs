@@ -12,13 +12,15 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Persist between scenes.
+            
         }
         else
         {
             Destroy(gameObject);
         }
     }
+
+   
 
     // Call this function when the game is lost.
     public void Paradox()
@@ -48,8 +50,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("No more levels! Game completed.");
-            // Optionally load a win screen or main menu.
+            LoadLevel(0);
+            
         }
     }
 

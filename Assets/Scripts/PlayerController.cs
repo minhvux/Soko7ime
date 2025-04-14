@@ -64,6 +64,7 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator MoveToPosition(Vector2 target, Vector2 moveDirection)
     {   
+        AudioManager.Instance.PlaySFX("Move", randomize: true);
         DataHub.Instance.ReportMoveStarted();
 
         // Set the animation parameters before starting the movement
@@ -197,5 +198,10 @@ public class PlayerController : MonoBehaviour
         DataHub.Instance.ReportMoveComplete();
     }
 
+    public void Win() {
+        
+        animator.SetBool("Win", true);
+        
+    }
     
 }
