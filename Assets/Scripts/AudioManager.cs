@@ -18,12 +18,18 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] musicSounds;
     public AudioClip[] sfxSounds;
 
+    // Store the default music volume for later restore.
+    [HideInInspector]
+    public float defaultMusicVolume;
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            if(musicSource != null)
+                defaultMusicVolume = musicSource.volume;
         }
         else
         {
@@ -82,7 +88,6 @@ public class AudioManager : MonoBehaviour
         }
     }
     
-    // Play music by searching for its name in musicSounds[]
     public void PlayMusic(string soundName, bool loop = true)
     {
         AudioClip clip = null;
@@ -105,7 +110,6 @@ public class AudioManager : MonoBehaviour
         }
     }
     
-    // Play SFX by searching for its name in sfxSounds[]
     public void PlaySFX(string soundName, bool randomize = true)
     {
         AudioClip clip = null;
@@ -126,5 +130,23 @@ public class AudioManager : MonoBehaviour
         {
             Debug.LogWarning("SFX sound not found: " + soundName);
         }
+    }
+    
+    // Fades the music volume to targetVolume over duration seconds.
+    public IEnumerator FadeMusicVolume(float targetVolume, float duration)
+    {
+        if(musicSource == null)
+            yield break;
+            
+        float startVolume = musicSource.volume;
+        float elapsed = 0f;
+        
+        while (elapsed < duration)
+        {
+            musicSource.volume = Mathf.Lerp(startVolume, targetVolume, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        musicSource.volume = targetVolume;
     }
 }

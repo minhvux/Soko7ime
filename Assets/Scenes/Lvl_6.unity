@@ -4260,6 +4260,8 @@ MonoBehaviour:
   futureMode: 0
   canFuture: 1
   futureIndex: 0
+  rewindEnabled: 1
+  futureEnabled: 0
 --- !u!4 &1681419012
 Transform:
   m_ObjectHideFlags: 0

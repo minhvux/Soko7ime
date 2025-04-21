@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class PastIndicatorController : MonoBehaviour
 {
-    public void Move(Vector2 moveDirection)
-    {
-        Vector2 targetPosition = (Vector2)transform.position + moveDirection;
-        transform.position = targetPosition;
+    public GameObject markerSprite;
+    public GameObject playerSprite;
+
+    public void DisablePlayerSprite(){
+        playerSprite.SetActive(false);
+    }
+
+    public void EnablePlayerSprite(){
+        playerSprite.SetActive(true);
     }
     
 }

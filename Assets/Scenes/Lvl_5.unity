@@ -223,7 +223,16 @@ PrefabInstance:
       propertyPath: m_text
       value: 'Q to teleport back to where
 
-        you are, 7 steps ago (marker)'
+        you were 7 steps ago. Can only
+        use it once'
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684025072873912045, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
+      propertyPath: m_fontSize
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684025072873912045, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 6080147287374351151, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
       propertyPath: m_Pivot.x
@@ -4296,7 +4305,6 @@ MonoBehaviour:
   futureIndicator: {fileID: 438807977}
   boxObjects:
   - {fileID: 162047694}
-  - {fileID: 0}
   switchControllers:
   - {fileID: 1000598212}
   - {fileID: 1453537087}
@@ -4315,6 +4323,8 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
+  rewindEnabled: 1
+  futureEnabled: 0
   isAlive: 1
   isMoving: 0
   canRewind: 1

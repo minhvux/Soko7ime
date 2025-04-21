@@ -11,30 +11,13 @@ public class InputManager : MonoBehaviour
     public float actionDelay = 0.2f;
     private float nextActionTime = 0f;
 
-    private float rKeyDownTime = 0f;
-    private bool isRKeyHeld = false;
-    public float resetTime = .5f; 
+    
 
     void Update()
     {   
         if (Input.GetKeyDown(KeyCode.R))
         {
-            rKeyDownTime = Time.time;
-            isRKeyHeld = true;
-        }
-        if (Input.GetKey(KeyCode.R) && isRKeyHeld)
-        {
-            if (Time.time - rKeyDownTime >= resetTime)
-            {
-                // Restart the level
-                GameManager.Instance.RestartLevel();
-                isRKeyHeld = false; // Prevent further restart calls
-                return;
-            }
-        }
-        if (Input.GetKeyUp(KeyCode.R))
-        {
-            isRKeyHeld = false;
+            GameManager.Instance.RestartLevel();
         }
 
 
@@ -79,7 +62,7 @@ public class InputManager : MonoBehaviour
                 // Handle Future Mode (E)
                 if (Input.GetKeyDown(KeyCode.E) && DataHub.Instance.canFuture)
                 {
-                    //DataHub.Instance.DataHubToggleFuture();
+                    DataHub.Instance.DataHubToggleFuture();
                     nextActionTime = Time.time + actionDelay;
                 }
             }

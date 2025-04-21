@@ -55,6 +55,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e48325abe61e2aa469fa0fc33fb8c05c, type: 3}
   sfxSounds:
   - {fileID: 8300000, guid: 2d117ffefd8b04e4bbea0513447bd569, type: 3}
+  - {fileID: 8300000, guid: b31c999502c9ce94b8a182d55d4e715d, type: 3}
+  - {fileID: 8300000, guid: 2f433c9d3094ad246927d161bfeab486, type: 3}
+  - {fileID: 8300000, guid: 70d5cfc048e150449a239fe5928ab824, type: 3}
+  defaultMusicVolume: 0
 --- !u!1 &4789190555368135913
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,7 +231,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 0
   Mute: 0

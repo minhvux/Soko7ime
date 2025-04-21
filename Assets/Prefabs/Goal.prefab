@@ -5095,6 +5095,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WinDelay: 1.2
   WinParticlePrefab: {fileID: 6763385115033209087}
+  fadeDuration: 0.1
+  lowerVolumeFactor: 0.55
 --- !u!95 &4477885018638453465
 Animator:
   serializedVersion: 5

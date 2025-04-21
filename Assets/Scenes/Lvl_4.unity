@@ -4458,11 +4458,13 @@ MonoBehaviour:
     m_Bits: 64
   isAlive: 1
   isMoving: 0
-  canRewind: 0
+  canRewind: 1
   rewindSteps: 7
   futureMode: 0
   canFuture: 1
   futureIndex: 0
+  rewindEnabled: 0
+  futureEnabled: 0
 --- !u!4 &1681419012
 Transform:
   m_ObjectHideFlags: 0

@@ -4265,9 +4265,11 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
+  rewindEnabled: 0
+  futureEnabled: 0
   isAlive: 1
   isMoving: 0
-  canRewind: 0
+  canRewind: 1
   rewindSteps: 7
   futureMode: 0
   canFuture: 1
@@ -4427,9 +4429,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 4236718148760012678, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
+      propertyPath: m_Pivot.y
+      value: -3.9
+      objectReference: {fileID: 0}
     - target: {fileID: 4684025072873912045, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
       propertyPath: m_text
-      value: Z to revert, hold R to reset
+      value: Z to revert 1 step, R to reset the level
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684025072873912045, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
+      propertyPath: m_fontSize
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684025072873912045, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 6080147287374351151, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
       propertyPath: m_Pivot.x

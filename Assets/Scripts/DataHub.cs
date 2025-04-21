@@ -26,6 +26,9 @@ public class DataHub : MonoBehaviour
     public LayerMask lavaLayer;
     public LayerMask playerLayer;
 
+    public bool rewindEnabled = true;
+    public bool futureEnabled = true;
+
 
     
     //private bool rewinded = false;
@@ -137,7 +140,7 @@ public class DataHub : MonoBehaviour
 
     public void DataHubRewind()
     {   
-
+        if (!rewindEnabled) return;
         if (GetHistoricalPosition(player, rewindSteps) == Vector2.zero && canFuture)
         {
             Debug.Log("No history available for rewind.");
@@ -145,6 +148,7 @@ public class DataHub : MonoBehaviour
         }
 
         player.GetComponent<PlayerController>().PlayerRewind();
+        pastIndicator.GetComponent<PastIndicatorController>().DisablePlayerSprite();
         
         
         
@@ -283,6 +287,11 @@ public class DataHub : MonoBehaviour
 
     private void PastIndicatorUpdate()
     {   
+        if (!rewindEnabled)
+        {
+            pastIndicator.SetActive(false);
+            return;
+        }
         if (pastIndicator != null)
         {
             if (canRewind)
@@ -291,16 +300,18 @@ public class DataHub : MonoBehaviour
                 if (!canFuture && futureIndicator.GetComponent<FutureIndicator>().isActive)
                 {   
                     pastIndicator.SetActive(true);
+                    pastIndicator.GetComponent<PastIndicatorController>().DisablePlayerSprite();
                     pastIndicator.transform.position = futurePastPlayer.transform.position;
                     return;
                 }
                 Vector2 pastPosition = GetHistoricalPosition(player, rewindSteps);
                 if (pastPosition == Vector2.zero)
                 {
-                    pastIndicator.SetActive(true);
+                    pastIndicator.SetActive(false);
                     return;
                 }
                 pastIndicator.SetActive(true);
+                pastIndicator.GetComponent<PastIndicatorController>().EnablePlayerSprite();
                 pastIndicator.transform.position = new Vector3(pastPosition.x, pastPosition.y, pastIndicator.transform.position.z);
             } 
             else 
@@ -384,7 +395,7 @@ public class DataHub : MonoBehaviour
 
     public void DataHubToggleFuture()
     {   
-        
+        if (!futureEnabled) return;
         // If not in future mode, enable it.
         if (!futureMode)
         {   

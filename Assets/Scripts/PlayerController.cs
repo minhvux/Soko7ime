@@ -99,7 +99,8 @@ public class PlayerController : MonoBehaviour
     }
 
     private IEnumerator StaticBounce(Vector2 target)
-    {
+    {   
+        AudioManager.Instance.PlaySFX("Bounce", randomize: true);
         DataHub.Instance.ReportMoveStarted();
         animator.SetBool("Bounce", true);
         Vector2 currentPosition = transform.position;
@@ -139,9 +140,11 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("Rewind", true);
         Debug.Log("Starting rewind...");
         yield return new WaitForSeconds(rewindDelayBefore);
+        AudioManager.Instance.PlaySFX("Pop", randomize: false);
         RewindBurstParticlePrefab.SetActive(true);
         transform.position = DataHub.Instance.pastIndicator.transform.position;
         yield return new WaitForSeconds(rewindDelayAfter);
+        
         RewindBurstParticlePrefab.SetActive(false);
         Debug.Log("Finished rewind");
 
