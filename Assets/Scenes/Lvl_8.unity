@@ -2617,6 +2617,14 @@ PrefabInstance:
         E again to
         confirm'
       objectReference: {fileID: 0}
+    - target: {fileID: 4684025072873912045, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
+      propertyPath: m_fontSize
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 4684025072873912045, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 45
+      objectReference: {fileID: 0}
     - target: {fileID: 6080147287374351151, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2699,7 +2707,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7285896812477242624, guid: dd39aa5dff81060488591cf74d6163e8, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3404,7 +3412,6 @@ MonoBehaviour:
   pastIndicatorController: {fileID: 1637024104}
   futurePastPlayerController: {fileID: 20218582}
   actionDelay: 0.2
-  resetTime: 0.7
 --- !u!1 &1601651488
 GameObject:
   m_ObjectHideFlags: 0
