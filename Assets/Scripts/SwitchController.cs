@@ -2,33 +2,37 @@ using UnityEngine;
 
 public class SwitchController : MonoBehaviour
 {
-    public GateController gateController;  // Reference to the GateController script
+    // Reference to the GateController that manages the gate.
+    public GateController gateController;
+    // This flag tracks whether this switch is currently activated.
+    [HideInInspector]
+    public bool isActivated = false;
+
+    void Start()
+    {
+        CheckActive();
+    }
 
     public void CheckActive()
     {   
         Physics2D.SyncTransforms();
-        // Check for overlapping colliders on the "Player" or "Block" layers
-        Debug.Log("Checking for collisions at " + transform.position);
+        // Check for overlapping colliders on the "Player" or "Box" layers.
         Collider2D collisionCollider = Physics2D.OverlapCircle(transform.position, 0.1f, LayerMask.GetMask("Player", "Box"));
-        
+
         if (collisionCollider != null)
         {
             Debug.Log("Switch at " + transform.position + " activated by: " + collisionCollider.gameObject.name);
-
-            // If the switch is activated, toggle the gate state by calling the ToggleGateState method
-            if (gateController != null)
-            {
-                // Toggle the gate state based on the switch being activated
-                gateController.ToggleGateState(true); // Passing 'true' indicates the switch is active
-            }
+            isActivated = true;
         }
         else
         {
-            // If no collision is detected, make sure the gate is activated again
-            if (gateController != null)
-            {
-                gateController.ToggleGateState(false); // Passing 'false' indicates the switch is not active
-            }
+            isActivated = false;
+        }
+
+        // Notify the gate controller to update gate state.
+        if (gateController != null)
+        {
+            gateController.UpdateGateState();
         }
     }
 }

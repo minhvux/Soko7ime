@@ -9,6 +9,7 @@ TagManager:
   - Lava
   - Switch
   - Box
+  - FuturePast
   layers:
   - Default
   - TransparentFX
@@ -54,4 +55,7 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 3785946315
+    locked: 0
+  - name: Indicator
+    uniqueID: 2391754613
     locked: 0

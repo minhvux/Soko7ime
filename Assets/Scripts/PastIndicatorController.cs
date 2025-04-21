@@ -4,8 +4,15 @@ using UnityEngine;
 
 public class PastIndicatorController : MonoBehaviour
 {
-    public void Rewind()
-    {   
-        DataHub.Instance.DataHubRewind();
+    public GameObject markerSprite;
+    public GameObject playerSprite;
+
+    public void DisablePlayerSprite(){
+        playerSprite.SetActive(false);
     }
+
+    public void EnablePlayerSprite(){
+        playerSprite.SetActive(true);
+    }
+    
 }

@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class BoxController : MonoBehaviour
 {   
-    private bool isMoving = false;
+
     public float moveSpeed = 6f;
+    
 
     public bool TryToPushBox(Vector2 moveDirection)
-    {
+    {   
+        
         Vector2 targetPosition = (Vector2)transform.position + moveDirection;
         if (!IsBlocked(targetPosition))
         {
@@ -23,8 +25,8 @@ public class BoxController : MonoBehaviour
 
     private IEnumerator MoveToPosition(Vector2 target)
     {
-        isMoving = true;
-
+        DataHub.Instance.ReportMoveStarted();
+        
         while (Vector2.Distance(a:transform.position, b:target) > 0.01f)
         {
             transform.position = Vector2.MoveTowards(transform.position, target, moveSpeed *  Time.deltaTime);
@@ -32,12 +34,14 @@ public class BoxController : MonoBehaviour
         }
 
         transform.position = target;
-        isMoving = false;
+       
+       DataHub.Instance.ReportMoveComplete();
+
     }
 
     private bool IsBlocked(Vector2 position)
     {
-        Collider2D hit = Physics2D.OverlapCircle(position, 0.1f, DataHub.Instance.wallLayer | DataHub.Instance.blockLayer);
+        Collider2D hit = Physics2D.OverlapCircle(position, 0.1f, DataHub.Instance.wallLayer | DataHub.Instance.blockLayer | DataHub.Instance.playerLayer);
         return hit != null;
     }
 

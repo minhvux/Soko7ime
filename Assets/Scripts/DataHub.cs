@@ -8,9 +8,10 @@ public class DataHub : MonoBehaviour
 
     // Separate event objects
     public GameObject player;
-    public GameObject futurePlayer;
+    public GameObject futurePastPlayer;
     public GameObject pastIndicator;
     public GameObject goalObject;
+    public GameObject futureIndicator;
     public List<GameObject> boxObjects;
 
     // Switches are maintained separately.
@@ -23,12 +24,28 @@ public class DataHub : MonoBehaviour
     public LayerMask wallLayer;
     public LayerMask goalLayer;
     public LayerMask lavaLayer;
+    public LayerMask playerLayer;
 
+    public bool rewindEnabled = true;
+    public bool futureEnabled = true;
+
+
+    
+    //private bool rewinded = false;
+
+    public bool isAlive = true;
+    public bool isMoving = false;
+    private int pendingMoves = 0;
+
+
+    public bool canRewind = true;
     public int rewindSteps = 7;
     private int rewindIndex = 0;
 
-    public bool isAlive = true;
-    public bool canRewind = true;
+    public bool futureMode = false;
+    public bool canFuture = true;
+    public int futureIndex = 0;
+    
 
     private void Awake()
     {
@@ -39,13 +56,13 @@ public class DataHub : MonoBehaviour
     }
 
     void Start()
-    {
+    {   
+        pastIndicator.transform.position = player.transform.position;
         // Combine objects that need history tracking.
         List<GameObject> eventObjects = new List<GameObject>();
         if (player != null) eventObjects.Add(player);
-        if (futurePlayer != null) eventObjects.Add(futurePlayer);
+        if (futurePastPlayer != null) eventObjects.Add(futurePastPlayer);
         if (pastIndicator != null) eventObjects.Add(pastIndicator);
-        if (goalObject != null) eventObjects.Add(goalObject);
         if (boxObjects != null)
         {
             foreach (var box in boxObjects)
@@ -64,6 +81,45 @@ public class DataHub : MonoBehaviour
         }
     }
 
+    public void Move(Vector2 moveDirection)
+    {   
+        
+        if (player != null && player.activeSelf)
+        {   
+            player.GetComponent<PlayerController>().TryToMove(moveDirection);
+        }
+        
+        if (futurePastPlayer != null && futurePastPlayer.activeSelf)
+        {   
+            futurePastPlayer.GetComponent<FuturePastPlayerController>().TryToMove(moveDirection);
+        }
+        
+        
+        
+    }
+
+    public void ReportMoveStarted()
+    {
+        pendingMoves++;
+        isMoving = true;
+    }
+
+    public void ReportMoveComplete()
+    {
+        pendingMoves--;
+        // When all moves are complete, update history once.
+        if (pendingMoves <= 0)
+        {   
+            isMoving = false;
+            if (!futureMode)
+            {
+                AfterMovingUpdate();
+            }
+        }
+        
+    }
+
+
     public void AfterMovingUpdate()
     {
         // Update the position history for all tracked objects.
@@ -77,15 +133,32 @@ public class DataHub : MonoBehaviour
             }
         }
         
+        IncrementRewindIndex();
+        //if (!canFuture) futureIndex++;
         UpdateAll();
     }
 
     public void DataHubRewind()
-    {
-        player.transform.position = pastIndicator.transform.position;
-        rewindIndex = -1;
+    {   
+        if (!rewindEnabled) return;
+        if (GetHistoricalPosition(player, rewindSteps) == Vector2.zero && canFuture)
+        {
+            Debug.Log("No history available for rewind.");
+            return;
+        }
+
+        player.GetComponent<PlayerController>().PlayerRewind();
+        pastIndicator.GetComponent<PastIndicatorController>().DisablePlayerSprite();
         
-        AfterMovingUpdate();
+        
+        
+        canRewind = false;
+
+        if (!canFuture){
+            futurePastPlayer.SetActive(false);
+        }
+        //rewinded = true;
+       
     
     }
 
@@ -95,8 +168,14 @@ public class DataHub : MonoBehaviour
         {
             RevertToPreviousPosition(obj);
         }
-        Debug.Log("Reverted all event objects to their previous positions.");
+        //Debug.Log("Reverted all event objects to their previous positions.");
+        player.GetComponent<PlayerController>().PlayerRevert();
+        futurePastPlayer.GetComponent<FuturePastPlayerController>().FuturePastPlayerRevert();
+        DecrementRewindIndex();
+        futureIndicator.GetComponent<FutureIndicator>().revertFutureIndicator();
         UpdateAll();
+        
+        
        
     }
 
@@ -114,21 +193,21 @@ public class DataHub : MonoBehaviour
     {
         if (obj == null)
         {
-            Debug.LogWarning("Provided object is null.");
+            //Debug.LogWarning("Provided object is null.");
             return Vector2.zero;
         }
         
         if (!eventPositionHistory.ContainsKey(obj))
         {
-            Debug.LogWarning("No history for object: " + obj.name);
+            //Debug.LogWarning("No history for object: " + obj.name);
             return new Vector2(obj.transform.position.x, obj.transform.position.y);
         }
         
         var historyStack = eventPositionHistory[obj];
         if (historyStack.Count < stepsAgo)
         {   
-            Debug.Log(historyStack.Count + " history for " + obj.name);
-            Debug.LogWarning("Not enough history for " + obj.name);
+            //Debug.Log(historyStack.Count + " history for " + obj.name);
+            //Debug.LogWarning("Not enough history for " + obj.name);
             return Vector2.zero;
         }
         
@@ -139,15 +218,23 @@ public class DataHub : MonoBehaviour
 
     private void UpdateAll(){
         CheckLava(player.transform.position);
+        if(futurePastPlayer.activeSelf && isAlive) CheckLava(futurePastPlayer.transform.position);
         CheckGoal(player.transform.position);
-        CheckSwitches();
+        
+        CheckSwitches();    
+        CheckParadox(player.transform.position);
+        if(futurePastPlayer.activeSelf && isAlive && !GameManager.Instance.paradox) CheckParadox(futurePastPlayer.transform.position);
+        if(!canFuture) futureIndicator.GetComponent<FutureIndicator>().CheckActive();    
         RewindIndexUpdate();
-        PastIndicatorUpdate();
-        Debug.Log("Rewind index: " + rewindIndex);
+
+        if(!futureMode) PastIndicatorUpdate();
+        //Debug.Log("Future index: " + futureIndex);
+        
     }
 
     private void CheckLava(Vector2 position)
-    {
+    {   
+        Physics2D.SyncTransforms();
         Collider2D hit = Physics2D.OverlapCircle(position, 0.1f, lavaLayer);
         if (hit != null)
         {
@@ -166,8 +253,29 @@ public class DataHub : MonoBehaviour
         if (hit != null)
         {
             Debug.Log("win");
+            player.GetComponent<PlayerController>().Win();
+            goalObject.GetComponent<Goal>().WinMove();
         }
     }
+
+    private void CheckParadox(Vector2 position)
+    { 
+        
+        Collider2D[] hits = Physics2D.OverlapCircleAll(position, 0.1f, playerLayer | blockLayer | wallLayer);
+        if (hits.Length > 1)
+        {
+            Debug.Log("Paradox detected at " + position);
+            GameManager.Instance.Paradox();
+            
+        }
+        else 
+        {
+            GameManager.Instance.NoParadox();
+            
+        }
+    }
+
+    
 
     private void CheckSwitches()
     {
@@ -179,10 +287,23 @@ public class DataHub : MonoBehaviour
 
     private void PastIndicatorUpdate()
     {   
+        if (!rewindEnabled)
+        {
+            pastIndicator.SetActive(false);
+            return;
+        }
         if (pastIndicator != null)
         {
             if (canRewind)
-            {
+            {   
+                //Debug.Log("Can rewind: " + canRewind);
+                if (!canFuture && futureIndicator.GetComponent<FutureIndicator>().isActive)
+                {   
+                    pastIndicator.SetActive(true);
+                    pastIndicator.GetComponent<PastIndicatorController>().DisablePlayerSprite();
+                    pastIndicator.transform.position = futurePastPlayer.transform.position;
+                    return;
+                }
                 Vector2 pastPosition = GetHistoricalPosition(player, rewindSteps);
                 if (pastPosition == Vector2.zero)
                 {
@@ -190,6 +311,7 @@ public class DataHub : MonoBehaviour
                     return;
                 }
                 pastIndicator.SetActive(true);
+                pastIndicator.GetComponent<PastIndicatorController>().EnablePlayerSprite();
                 pastIndicator.transform.position = new Vector3(pastPosition.x, pastPosition.y, pastIndicator.transform.position.z);
             } 
             else 
@@ -201,23 +323,136 @@ public class DataHub : MonoBehaviour
 
     private void RewindIndexUpdate()
     {   
+        //Debug.Log(canRewind);
+        //Debug.Log(rewindIndex);
+        if (rewindIndex > 0)
+        {
+            canRewind = false;
+            
+        }
+        else if (rewindIndex == 0)
+        {   
+            if (!canFuture)
+            {   
+
+                if (futureIndicator.GetComponent<FutureIndicator>().isActive) futurePastPlayer.SetActive(true);
+                
+            }
+            canRewind = true;
+            
+            //rewinded = false;
+            //pastIndicator.SetActive(true);
+        } 
+
+        if (futureIndex > 0)
+        {
+            canFuture = false;
+            
+        }
+        else if (futureIndex == 0)
+        {   
+            if (!canFuture)
+            {
+                futurePastPlayer.SetActive(false);
+            }
+            canFuture = true;
+            futureIndicator.SetActive(false);
+            
+        }
+        
+        
+
+        
+    }
+
+    private void IncrementRewindIndex()
+    {
+        if (!canRewind) 
+        {
+            rewindIndex++;
+            
+        }
+
+        if (!canFuture)
+        {
+            futureIndex++;
+        }
+    }
+
+    private void DecrementRewindIndex()
+    {
         if (rewindIndex > 0)
         {
             rewindIndex--;
-            canRewind = false;
-            //pastIndicator.SetActive(false);
-            Debug.Log("Rewind index is 0, cannot rewind anymore.");
         }
-        else if (rewindIndex == 0)
-        {
-            canRewind = true;
-            //pastIndicator.SetActive(true);
-        } else 
-        {
-            canRewind = false;
-        }
-        if (!canRewind) rewindIndex++;
 
-        Debug.Log("Rewind index: " + rewindIndex);
+        if (futureIndex > 0)
+        {
+            futureIndex--;
+        }
+    }
+
+
+    public void DataHubToggleFuture()
+    {   
+        if (!futureEnabled) return;
+        // If not in future mode, enable it.
+        if (!futureMode)
+        {   
+            AfterMovingUpdate();
+            DataHubToFuture();
+
+        }
+        else
+        {   
+            CheckParadox(player.transform.position);
+            if (GameManager.Instance.paradox) 
+            {
+                Debug.Log("Cannot settle here – the location overlaps with an obstacle.");
+                GameManager.Instance.NoParadox();
+            }           
+            else
+            {
+                SettleFuture();
+            }
+        }
+
+        
+    }
+
+    public void DataHubToFuture()
+    {
+        if (futurePastPlayer != null)
+        {
+            futurePastPlayer.transform.position = player.transform.position;
+            futurePastPlayer.SetActive(true);
+            futureMode = true;
+
+            player.GetComponent<PlayerController>().PlayerToFuture();
+            futurePastPlayer.GetComponent<FuturePastPlayerController>().FuturePastPlayerToFuture();
+        }
+        if (pastIndicator != null)
+        {
+            pastIndicator.SetActive(false);
+        }
+    }
+    public void SettleFuture()
+    {   
+        futureMode = false;
+        //Debug.Log(canFuture);
+        canFuture = false;
+        futureIndicator.transform.position = player.transform.position;
+        futureIndicator.SetActive(true);
+
+        player.GetComponent<PlayerController>().PlayerSettleFuture();
+        futurePastPlayer.GetComponent<FuturePastPlayerController>().FuturePastPlayerSettleFuture();
+         
+
+    }
+
+    public void DeactivateFuturePastPlayer()
+    {
+        futurePastPlayer.SetActive(false);
+        
     }
 }

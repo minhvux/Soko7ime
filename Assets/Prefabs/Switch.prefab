@@ -57,7 +57,7 @@ Tilemap:
   - m_RefCount: 0
     m_Data: {fileID: 0}
   - m_RefCount: 1
-    m_Data: {fileID: 11400000, guid: 1eefef5dbbdffe14b95ea0735d1327d2, type: 2}
+    m_Data: {fileID: 11400000, guid: 71da0f14264c58b4aa50884e7b93daaa, type: 2}
   m_TileSpriteArray:
   - m_RefCount: 0
     m_Data: {fileID: 0}
@@ -70,7 +70,7 @@ Tilemap:
   - m_RefCount: 0
     m_Data: {fileID: 0}
   - m_RefCount: 1
-    m_Data: {fileID: 1734553164, guid: fcb3811ff98579b43b23b5286b2e3c3d, type: 3}
+    m_Data: {fileID: 21300000, guid: 3aa1b3a6f3115ac4abcfaa567ed625c4, type: 3}
   m_TileMatrixArray:
   - m_RefCount: 1
     m_Data:
@@ -159,7 +159,7 @@ TilemapRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
-  m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
+  m_ChunkCullingBounds: {x: 0.016129017, y: 0.016129017, z: 0}
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 0
@@ -285,3 +285,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7d6f596aa52f744a6006fc17fb0aea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gateController: {fileID: 0}
+  isActivated: 0
